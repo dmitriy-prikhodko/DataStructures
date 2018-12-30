@@ -4,10 +4,10 @@ open Xunit
 open Swensen.Unquote
 open DataStructures
 
-    module Empty = 
+    module Keys = 
 
         [<Fact>] 
-        let ``should create empty HashTable`` () =
+        let ``should not return any keys for empty HashTable`` () =
             let table = HashTable.empty<int, int>
 
-            test <@ HashTable.isEmpty table @>
+            test <@ HashTable.keys table = Seq.empty @>

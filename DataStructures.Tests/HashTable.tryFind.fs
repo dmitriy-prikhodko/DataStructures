@@ -4,10 +4,10 @@ open Xunit
 open Swensen.Unquote
 open DataStructures
 
-    module Empty = 
+    module TryFind =
 
         [<Fact>] 
-        let ``should create empty HashTable`` () =
+        let ``should return None for empty HashTable`` () =
             let table = HashTable.empty<int, int>
 
-            test <@ HashTable.isEmpty table @>
+            test <@ HashTable.tryFind 0 table = None @>

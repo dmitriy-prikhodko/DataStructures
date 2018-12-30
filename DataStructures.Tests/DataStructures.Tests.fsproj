@@ -7,20 +7,32 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="HashTable.add.fs" />
+    <Compile Include="HashTable.remove.fs" />
+    <Compile Include="HashTable.find.fs" />
+    <Compile Include="HashTable.tryFind.fs" />
+    <Compile Include="HashTable.containsKey.fs" />
+    <Compile Include="HashTable.containsValue.fs" />
+    <Compile Include="HashTable.isEmpty.fs" />
+    <Compile Include="HashTable.count.fs" />
+    <Compile Include="HashTable.keys.fs" />
+    <Compile Include="HashTable.values.fs" />
     <Compile Include="HashTable.empty.fs" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.7.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
     <PackageReference Include="Unquote" Version="4.0.0" />
-    <PackageReference Include="xunit" Version="2.3.1" />
-    <PackageReference Include="xunit.runner.console" Version="2.4.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1" />
+    <PackageReference Include="xunit" Version="2.4.1" />
     <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\DataStrucutes\DataStructures.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="4.5.4" />
   </ItemGroup>
 
 </Project>
