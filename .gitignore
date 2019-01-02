@@ -68,3 +68,6 @@ coverage.json
 
 # Visual Studio 2015
 .vs/
+
+# NCrunch
+_NCrunch_DataStrucutes/

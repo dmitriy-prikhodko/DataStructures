@@ -1,17 +1,19 @@
 namespace DataStructures        
 
 
-type HashTable<'Key, 'Value when 'Key: comparison and 'Value : equality> (initTable: InternalTable<'Key, 'Value>) = 
+type HashTable<'Key, 'Value when 'Key: comparison and 'Value : equality> (initTable: InternalTable<'Key, 'Value>, initCount: int) = 
     let initialLength = 1000
     let fillFactor = 0.75
 
+    let count = initCount
     let table = initTable
 
-    member this.Add key value = new HashTable<'Key, 'Value>(InternalTable.add key value initialLength fillFactor table)
-    member this.Remove key = new HashTable<'Key, 'Value>(InternalTable.remove key table)
+    member this.Add key value = new HashTable<'Key, 'Value>(InternalTable.add key value initialLength fillFactor (table, count))
+    member this.Remove key = new HashTable<'Key, 'Value>(InternalTable.remove key (table, count))
+
 
     member this.IsEmpty = InternalTable.isEmpty table
-    member this.Count = InternalTable.count table
+    member this.Count = count
 
     member this.Keys = InternalTable.keys table
     member this.Values = InternalTable.values table
@@ -37,4 +39,4 @@ module HashTable =
     let keys (table: HashTable<'Key, 'Value>) : seq<'Key> = table.Keys
     let values (table: HashTable<'Key, 'Value>) : seq<'Value> = table.Values
 
-    let empty<'Key, 'Value when 'Key: comparison and 'Value : equality> : HashTable<'Key, 'Value> = new HashTable<'Key, 'Value>(InternalTable.empty)
+    let empty<'Key, 'Value when 'Key: comparison and 'Value : equality> : HashTable<'Key, 'Value> = new HashTable<'Key, 'Value>(InternalTable.empty, 0)

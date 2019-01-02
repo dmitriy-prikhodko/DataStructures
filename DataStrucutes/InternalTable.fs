@@ -10,7 +10,7 @@ module InternalTable =
     let private generateIntex key arr = (Hash.generate key) % (Array.length arr)
 
     let private init length = 
-         Array.init length (fun _ -> TableElementEmpty) |> TableArray
+         Array.init length (fun _ -> TableElementEmpty) |> TableArray, 0
 
     let tryFindItemWithKey key = function
         | TableEmpty -> None
@@ -23,67 +23,60 @@ module InternalTable =
         | Some _ -> true
         | None -> false
 
-    let private validateKeyForAdding key table = 
+    let private validateKeyForAdding key (table, count) = 
         if (containsItemWithKey key table) then 
             raise (System.ArgumentException(sprintf "The table is already contains the key %A" key))
         else
-            table
+            (table, count)
 
-    let private validateKeyForRemoving key table = 
+    let private validateKeyForRemoving key (table, count) = 
         if (containsItemWithKey key table) then 
-            table
+            (table, count)
         else
             raise (System.ArgumentException(sprintf "The table does not contain the key %A" key))
 
-    let private initIfEmpty initialLength table = 
+    let private initIfEmpty initialLength (table, count) = 
         match table with
         |TableEmpty -> init initialLength
-        |TableArray _ -> table
+        |TableArray _ -> (table, count)
 
-    let private addItem key value table = 
+    let private addItem key value (table, count) = 
         match table with
         |TableArray arr -> 
             let index = generateIntex key arr
             arr.[index] <- InternalTableElement.add key value arr.[index]
-            TableArray arr
-        | _ -> table
+            TableArray arr, count + 1
+        | _ -> (table, count)
 
-    let private removeItem key table = 
+    let private removeItem key (table, count) = 
         match table with
         | TableArray arr -> 
             let index = generateIntex key arr
             arr.[index] <- InternalTableElement.remove key arr.[index]
-            TableArray arr
-        | TableEmpty -> table
+            TableArray arr, count - 1
+        | TableEmpty -> (table, count)
         
     let private items = function
         | TableEmpty -> Seq.empty
         | TableArray array -> array |> Array.fold (fun x y -> Seq.append x (InternalTableElement.items y)) Seq.empty
 
-    let private countOfItems = function
-        | TableEmpty -> 0
-        | TableArray array -> array |> Array.fold (fun x y -> x + InternalTableElement.count y) 0
-
-    let private resizeIfFillFactorExceeds (fillFactor:float) table = 
+    let private resizeIfFillFactorExceeds (fillFactor:float) (table, count) = 
         match table with
-        | TableArray arr when countOfItems table >= int (fillFactor * float arr.Length) -> 
-            let newArr = init (arr.Length * 2)
-            for (key,value) in items table do addItem key value newArr |> ignore
-            newArr
-        | _ -> table
+        | TableArray arr when count >= int (fillFactor * float arr.Length) -> 
+            let result = Seq.fold (fun (table, count) (key, value) -> addItem key value (table, count)) (init (arr.Length * 2)) (items table)
+            result
+        | _ -> (table, count)
 
-    let private markAsEmptyIfCountIsZero table =
+    let private markAsEmptyIfCountIsZero (table, count) =
         match table with
-        | TableArray _ when countOfItems table = 0 -> TableEmpty
-        | _ -> table        
+        | TableArray _ when count = 0 -> TableEmpty, 0
+        | _ -> (table, count)        
 
     let empty = TableEmpty
 
     let isEmpty = function 
         | TableEmpty -> true
         | _ -> false
-
-    let count = countOfItems
 
     let keys = function
         | TableEmpty -> Seq.empty

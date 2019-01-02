@@ -17,6 +17,7 @@ open DataStructures
         [<InlineData(2)>]
         [<InlineData(123)>]
         [<InlineData(2000)>]
+        [<InlineData(999)>]
         let ``should return number of elements in the HashTable`` (n) =
             let mutable table = HashTable.empty<int, int>
             for i = 1 to n do
