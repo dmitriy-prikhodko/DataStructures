@@ -6,14 +6,14 @@ type InternalTable<'Key, 'Value> =
 
 module InternalTable = 
 
-    let private generateIntex key arr = (Hash.generate key) % (Array.length arr)
+    let private generateIndex key arr = (Hash.generate key) % (Array.length arr)
 
     let private init length =  TableArray (Array.init length (fun _ -> TableElementEmpty), 0)
 
-    let tryFindItemWithKey key = function
+    let private tryFindItemWithKey key = function
         | TableArray (_, count) when count = 0 -> None
         | TableArray (array, _) -> 
-            let index = generateIntex key array
+            let index = generateIndex key array
             InternalTableElement.tryFind key array.[index]
 
     let private containsItemWithKey key table = 
@@ -35,22 +35,18 @@ module InternalTable =
 
     let private initIfEmpty initialLength table = 
         match table with
-        |TableArray (_, count) when count = 0 -> init initialLength
-        |TableArray _ -> table
+        | TableArray (_, count) when count = 0 -> init initialLength
+        | TableArray _ -> table
 
-    let private addItem key value table = 
-        match table with
-        |TableArray (arr, count) -> 
-            let index = generateIntex key arr
+    let private addItem key value = function
+        | TableArray (arr, count) -> 
+            let index = generateIndex key arr
             arr.[index] <- InternalTableElement.add key value arr.[index]
             TableArray (arr, count + 1)
-        | _ -> table
 
-    let private removeItem key table = 
-        match table with
-        | TableArray (_, count) when count = 0 -> table
+    let private removeItem key = function
         | TableArray (arr, count) -> 
-            let index = generateIntex key arr
+            let index = generateIndex key arr
             arr.[index] <- InternalTableElement.remove key arr.[index]
             TableArray (arr, count - 1)
         
@@ -64,13 +60,15 @@ module InternalTable =
             Seq.fold (fun table (key, value) -> addItem key value table) (init (arr.Length * 2)) (items table)
         | _ -> table
 
-    let empty = TableArray (Array.empty, 0)
+    let private createEmptyArray = TableArray (Array.empty, 0)
 
     let private cleanupIfCountIsZero table =
         match table with
-        | TableArray (_, count) when count = 0 -> empty
+        | TableArray (_, count) when count = 0 -> createEmptyArray
         | _ -> table       
  
+
+    let empty = createEmptyArray
 
     let isEmpty = function 
         | TableArray (_, count) -> count = 0
