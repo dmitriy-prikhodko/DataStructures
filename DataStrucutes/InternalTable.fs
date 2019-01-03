@@ -1,7 +1,6 @@
 ﻿namespace DataStructures   
 
 type InternalTable<'Key, 'Value> = 
-    | TableEmpty
     | TableArray of InternalTableElement<'Key, 'Value>[]*int
 
 
@@ -12,7 +11,7 @@ module InternalTable =
     let private init length =  TableArray (Array.init length (fun _ -> TableElementEmpty), 0)
 
     let tryFindItemWithKey key = function
-        | TableEmpty -> None
+        | TableArray (_, count) when count = 0 -> None
         | TableArray (array, _) -> 
             let index = generateIntex key array
             InternalTableElement.tryFind key array.[index]
@@ -36,7 +35,7 @@ module InternalTable =
 
     let private initIfEmpty initialLength table = 
         match table with
-        |TableEmpty -> init initialLength
+        |TableArray (_, count) when count = 0 -> init initialLength
         |TableArray _ -> table
 
     let private addItem key value table = 
@@ -49,14 +48,14 @@ module InternalTable =
 
     let private removeItem key table = 
         match table with
+        | TableArray (_, count) when count = 0 -> table
         | TableArray (arr, count) -> 
             let index = generateIntex key arr
             arr.[index] <- InternalTableElement.remove key arr.[index]
             TableArray (arr, count - 1)
-        | TableEmpty -> table
         
     let private items = function
-        | TableEmpty -> Seq.empty
+        | TableArray (_, count) when count = 0 -> Seq.empty
         | TableArray (array, _) -> array |> Array.fold (fun x y -> Seq.append x (InternalTableElement.items y)) Seq.empty
 
     let private resizeIfFillFactorExceeds (fillFactor:float) table = 
@@ -65,27 +64,26 @@ module InternalTable =
             Seq.fold (fun table (key, value) -> addItem key value table) (init (arr.Length * 2)) (items table)
         | _ -> table
 
-    let private markAsEmptyIfCountIsZero table =
-        match table with
-        | TableArray (_, count) when count = 0 -> TableEmpty
-        | _ -> table       
+    let empty = TableArray (Array.empty, 0)
 
-    let empty = TableEmpty
+    let private cleanupIfCountIsZero table =
+        match table with
+        | TableArray (_, count) when count = 0 -> empty
+        | _ -> table       
+ 
 
     let isEmpty = function 
-        | TableEmpty -> true
-        | _ -> false
+        | TableArray (_, count) -> count = 0
 
     let count = function 
-        | TableEmpty -> 0
         | TableArray (_, count) -> count
 
     let keys = function
-        | TableEmpty -> Seq.empty
+        | TableArray (_, count) when count = 0 -> Seq.empty
         | TableArray (array, _) -> array |> Array.fold (fun x y -> Seq.append x (InternalTableElement.keys y)) Seq.empty
 
     let values = function
-        | TableEmpty -> Seq.empty
+        | TableArray (_, count) when count = 0 -> Seq.empty
         | TableArray (array, _) -> array |> Array.fold (fun x y -> Seq.append x (InternalTableElement.values y)) Seq.empty
 
     let tryFind = tryFindItemWithKey
@@ -111,4 +109,4 @@ module InternalTable =
     let remove key = 
         validateKeyForRemoving key
         >> removeItem key
-        >> markAsEmptyIfCountIsZero
+        >> cleanupIfCountIsZero
