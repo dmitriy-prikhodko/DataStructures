@@ -1,20 +1,20 @@
 ﻿namespace DataStructures   
 
-type InternalTable<'Key, 'Value> = 
-    | TableArray of InternalTableElement<'Key, 'Value>[]*int
+type HashTableArray<'Key, 'Value> = 
+    | TableArray of HashTableArrayElement<'Key, 'Value>[]*int
 
 
-module InternalTable = 
+module HashTableArray = 
 
     let private generateIndex key arr = (Hash.generate key) % (Array.length arr)
 
-    let private init length =  TableArray (Array.init length (fun _ -> TableElementEmpty), 0)
+    let private init length =  TableArray (Array.init length (fun _ -> Empty), 0)
 
     let private tryFindItemWithKey key = function
         | TableArray (_, count) when count = 0 -> None
         | TableArray (array, _) -> 
             let index = generateIndex key array
-            InternalTableElement.tryFind key array.[index]
+            HashTableArrayElement.tryFind key array.[index]
 
     let private containsItemWithKey key table = 
         match tryFindItemWithKey key table with
@@ -41,18 +41,18 @@ module InternalTable =
     let private addItem key value = function
         | TableArray (arr, count) -> 
             let index = generateIndex key arr
-            arr.[index] <- InternalTableElement.add key value arr.[index]
+            arr.[index] <- HashTableArrayElement.add key value arr.[index]
             TableArray (arr, count + 1)
 
     let private removeItem key = function
         | TableArray (arr, count) -> 
             let index = generateIndex key arr
-            arr.[index] <- InternalTableElement.remove key arr.[index]
+            arr.[index] <- HashTableArrayElement.remove key arr.[index]
             TableArray (arr, count - 1)
         
     let private items = function
         | TableArray (_, count) when count = 0 -> Seq.empty
-        | TableArray (array, _) -> array |> Array.fold (fun x y -> Seq.append x (InternalTableElement.items y)) Seq.empty
+        | TableArray (array, _) -> array |> Array.fold (fun x y -> Seq.append x (HashTableArrayElement.items y)) Seq.empty
 
     let private resizeIfFillFactorExceeds (fillFactor:float) table = 
         match table with
@@ -78,11 +78,11 @@ module InternalTable =
 
     let keys = function
         | TableArray (_, count) when count = 0 -> Seq.empty
-        | TableArray (array, _) -> array |> Array.fold (fun x y -> Seq.append x (InternalTableElement.keys y)) Seq.empty
+        | TableArray (array, _) -> array |> Array.fold (fun x y -> Seq.append x (HashTableArrayElement.keys y)) Seq.empty
 
     let values = function
         | TableArray (_, count) when count = 0 -> Seq.empty
-        | TableArray (array, _) -> array |> Array.fold (fun x y -> Seq.append x (InternalTableElement.values y)) Seq.empty
+        | TableArray (array, _) -> array |> Array.fold (fun x y -> Seq.append x (HashTableArrayElement.values y)) Seq.empty
 
     let tryFind = tryFindItemWithKey
 

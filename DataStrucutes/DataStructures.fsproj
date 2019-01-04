@@ -6,8 +6,8 @@
 
   <ItemGroup>
     <Compile Include="Hash.fs" />
-    <Compile Include="InternalTableElement.fs" />
-    <Compile Include="InternalTable.fs" />
+    <Compile Include="HashTableArrayElement.fs" />
+    <Compile Include="HashTableArray.fs" />
     <Compile Include="HashTable.fs" />
   </ItemGroup>
 
